@@ -2,17 +2,19 @@
 require "config.php";
 
 
-function fetchData($query) {
+function fetchData($query)
+{
     global $conn;
     $results = mysqli_query($conn, $query);
     $rows = [];
-    while ($row = mysqli_fetch_assoc($results) ) {
-        $rows [] = $row;
+    while ($row = mysqli_fetch_assoc($results)) {
+        $rows[] = $row;
     }
     return $rows;
 }
 
-function actions($actionName) {
+function actions($actionName)
+{
     global $conn;
     switch ($actionName) {
         case "tambahBuku":
@@ -42,7 +44,8 @@ function actions($actionName) {
     }
 }
 
-function tambahBuku($post, $conn) {
+function tambahBuku($post, $conn)
+{
     $title        = $post["title"];
     $author       = $post["author"];
     $jumlah_buku  = $post["jumlah_buku"];
@@ -52,7 +55,8 @@ function tambahBuku($post, $conn) {
     return mysqli_affected_rows($conn);
 }
 
-function editBuku($post, $conn) {
+function editBuku($post, $conn)
+{
     $id_buku      = $post["id_buku"];
     $title        = $post["title"];
     $author       = $post["author"];
@@ -63,34 +67,36 @@ function editBuku($post, $conn) {
     return mysqli_affected_rows($conn);
 }
 
-function hapusBuku($get, $conn) {
+function hapusBuku($get, $conn)
+{
     $id_buku     = $get["id_buku"];
     $query = "DELETE FROM books WHERE id_buku = '$id_buku'";
     mysqli_query($conn, $query);
     return mysqli_affected_rows($conn);
 }
 
-function registerAkun($data, $conn){
+function registerAkun($data, $conn)
+{
     $username             = $data["username"];
     $role                 = $data["role"];
     $password             = mysqli_real_escape_string($conn, $data["password"]);
     $konfirmasi_password  = mysqli_real_escape_string($conn, $data["konfirmasi_password"]);
-    if ( $password !== $konfirmasi_password) {
+    if ($password !== $konfirmasi_password) {
         echo "<script>alert('Konfirmasi password tidak sama')</script>";
         return false;
     }
-    $passwordHashed = password_hash($password, PASSWORD_DEFAULT);
-    mysqli_query($conn, "INSERT INTO `users` VALUES(NULL, '$username', '$passwordHashed', '$role')");
+    mysqli_query($conn, "INSERT INTO `users` VALUES(NULL, '$username', '$password', '$role')");
     return mysqli_affected_rows($conn);
 }
 
-function loginAkun($data, $conn){
+function loginAkun($data, $conn)
+{
     $username          = $data["username"];
     $password          = mysqli_real_escape_string($conn, $data["password"]);
     $result = mysqli_query($conn, "SELECT * FROM users WHERE username = '$username'");
-    if ( mysqli_num_rows($result) === 1 ) {
+    if (mysqli_num_rows($result) === 1) {
         $row = mysqli_fetch_assoc($result);
-        if(password_verify($password, $row["password"])){
+        if ($row["password"] == $password) {
             session_start();
             $_SESSION["login"] = true;
             $_SESSION["id_user"]    = $row["id"];
@@ -102,7 +108,8 @@ function loginAkun($data, $conn){
     return "USER_TIDAK_DITEMUKAN";
 }
 
-function peminjamanBuku($post, $conn) {
+function peminjamanBuku($post, $conn)
+{
     $id_buku        = $post["id_buku"];
     $id_user        = $post["id_user"];
     $jumlah_pinjam  = $post["jumlah_pinjam"];
@@ -136,7 +143,8 @@ function peminjamanBuku($post, $conn) {
     return mysqli_affected_rows($conn);
 }
 
-function pengembalianBuku($post, $conn) {
+function pengembalianBuku($post, $conn)
+{
     $id_buku        = $post["id_buku"];
     $id_user        = $post["id_user"];
     $jumlah_dikembalikan  = $post["jumlah_dikembalikan"];
@@ -162,7 +170,7 @@ function pengembalianBuku($post, $conn) {
 
     if ($jumlahPinjamanSaatIni < 1) {
         $queryDeletePeminjaman = "DELETE FROM `peminjaman` WHERE id_buku = '$id_buku' AND id_user = '$id_user'";
-        mysqli_query($conn, $queryDeletePeminjaman );
+        mysqli_query($conn, $queryDeletePeminjaman);
         return mysqli_affected_rows($conn);
     }
 
@@ -170,4 +178,3 @@ function pengembalianBuku($post, $conn) {
     mysqli_query($conn, $queryUpdatePeminjaman);
     return mysqli_affected_rows($conn);
 }
-?>
